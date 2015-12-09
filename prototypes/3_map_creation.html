@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <title>Phaser - Making your first game, part 1</title>
-  <script type="text/javascript" src="js/perlin.js"></script>
+  <script type="text/javascript" src="js/noise.js"></script>
   <style type="text/css">
   body {
     margin: 0;
@@ -17,32 +17,7 @@
   <script type="text/javascript">
 
     var noise = new Noise();
-    noise.seed(Math.random());
-
-    var sumOctave = function(num_iterations, x, y, persistence, scale, low, high) {
-      var maxAmp = 0,
-          amp = 1,
-          freq = scale,
-          _noise = 0;
-
-      // add successively smaller, higher-frequency terms
-      for(var i=0; i < num_iterations; i++) {
-        _noise += noise.simplex2(x * freq, y * freq) * amp
-        maxAmp += amp
-        amp *= persistence
-        freq *= 2
-      }
-
-      // take the average value of the iterations
-      _noise /= maxAmp
-
-      // normalize the result
-      _noise = _noise * (high - low) / 2 + (high + low) / 2
-
-      return _noise
-    }
-
-
+    // noise.seed(Math.random());
 
     var canvas = document.getElementsByTagName('canvas')[0];
     var overlapSize = 32;
@@ -58,7 +33,8 @@
     for (var x = 0; x < canvas.width; x++) {
       dataArr[x] = [];
       for (var y = 0; y < canvas.height + overlapSize; y++) {
-        var value = sumOctave(8, x, y, 0.5, scale, 0, 255)
+        // var value = sumOctave(8, x, y, 0.5, scale, 0, 255)
+        var value = noise.simplex2SumOctave(8, x, y, 0.5, scale, 0, 255);
         dataArr[x][y] = value;
       }
       var overlap = dataArr[x].splice((canvas.width - 1 - overlapSize), canvas.width-1);

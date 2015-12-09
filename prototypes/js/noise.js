@@ -307,5 +307,28 @@ var Noise = function(){
        v);
   };
 
+  module.simplex2SumOctave = function(iterations, x, y, persistence, scale, low, high) {
+    var maxAmp = 0,
+        amp = 1,
+        freq = scale,
+        noise = 0;
+
+    // add successively smaller, higher-frequency terms
+    for(var i=0; i < iterations; i++) {
+      noise += module.simplex2(x * freq, y * freq) * amp
+      maxAmp += amp
+      amp *= persistence
+      freq *= 2
+    }
+
+    // take the average value of the iterations
+    noise /= maxAmp
+
+    // normalize the result
+    noise = noise * (high - low) / 2 + (high + low) / 2
+
+    return noise
+  }
+
   return module;
 };
