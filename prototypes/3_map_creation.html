@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Phaser - Making your first game, part 1</title>
+  <script type="text/javascript" src="js/perlin.js"></script>
+  <style type="text/css">
+  body {
+    margin: 0;
+  }
+  </style>
+</head>
+<body>
+
+  <canvas></canvas>
+
+  <script type="text/javascript">
+    var sumOctave = function(num_iterations, x, y, persistence, scale, low, high) {
+      var maxAmp = 0,
+          amp = 1,
+          freq = scale,
+          _noise = 0;
+
+      // add successively smaller, higher-frequency terms
+      for(var i=0; i < num_iterations; i++) {
+        _noise += noise.simplex2(x * freq, y * freq) * amp
+        maxAmp += amp
+        amp *= persistence
+        freq *= 2
+      }
+
+      // take the average value of the iterations
+      _noise /= maxAmp
+
+      // normalize the result
+      _noise = _noise * (high - low) / 2 + (high + low) / 2
+
+      return _noise
+    }
+
+
+
+    var canvas = document.getElementsByTagName('canvas')[0];
+    var overlapSize = 32;
+    canvas.width = 512;
+    canvas.height = 512;
+    noise.seed(Math.random());
+    var scale = .005;
+    var ctx = canvas.getContext('2d');
+    var image = ctx.createImageData(canvas.width, canvas.height);
+    var data = image.data;
+
+    var waterLevel = 140;
+    var dataArr = [];
+    for (var x = 0; x < canvas.width; x++) {
+      dataArr[x] = [];
+      for (var y = 0; y < canvas.height + overlapSize; y++) {
+        var value = sumOctave(8, x, y, 0.5, scale, 0, 255)
+        dataArr[x][y] = value;
+      }
+      var overlap = dataArr[x].splice((canvas.width - 1 - overlapSize), canvas.width-1);
+      var multip = overlapSize;
+      for(var o=0; o < overlapSize; o++) {
+        dataArr[x][o] = ((overlap[o] * multip) + (dataArr[x][o] * o)) / overlapSize;
+        multip--;
+      }
+      // hacky ocean post-process
+      for (var y = 0; y < canvas.height + overlapSize; y++) {
+        if (dataArr[x][y] < waterLevel) {
+          dataArr[x][y] = waterLevel * 0.8;
+        }
+      }
+    }
+
+    // dataArr = dataArr.concat(dataArr.splice(0, 255));
+
+    for (var x = 0; x < canvas.width; x++) {
+      for (var y = 0; y < canvas.height; y++) {
+        var cell = (x + y * canvas.width) * 4;
+        data[cell] = data[cell + 1] = data[cell + 2] = dataArr[x][y];
+        data[cell + 3] = 255; // alpha.
+      }
+    }
+
+    ctx.putImageData(image, 0, 0);
+
+  </script>
+
+</body>
+</html>
