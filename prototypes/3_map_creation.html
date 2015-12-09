@@ -38,21 +38,33 @@
         var value = noise.simplex2SumOctave(8, x, y, 0.5, scale, 0, 255);
         data[x][y] = value;
       }
+    }
       // Blend
+    for (var x = 0; x < canvas.width; x++) {
       var multiplier = blendSize;
       for(var b=0; b<blendSize; b++) {
-        var wrapped = noise.simplex2SumOctave(8, x, y+b, 0.5, scale, 0, 255);
+        var wrapped = noise.simplex2SumOctave(8, x, canvas.height+b, 0.5, scale, 0, 255);
         data[x][b] = ((wrapped * multiplier) + (data[x][b] * b)) / blendSize;
         multiplier--;
       }
-      // hacky ocean post-process
+    }
+    var multiplier = blendSize;
+    for(var b=0; b<blendSize; b++) {
+      for (var y = 0; y < canvas.height; y++) {
+        var wrapped = noise.simplex2SumOctave(8, canvas.width+b, y, 0.5, scale, 0, 255);
+        data[b][y] = ((wrapped * multiplier) + (data[b][y] * b)) / blendSize;
+      }
+      multiplier--;
+    }
+
+    // hacky ocean post-process
+    for (var x = 0; x < canvas.width; x++) {
       for (var y = 0; y < canvas.height; y++) {
         if (data[x][y] < waterLevel) {
           data[x][y] = waterLevel * 0.8;
         }
       }
     }
-    // data = data.concat(data.splice(0, 255));
 
     // Write image.data
     for (var x = 0; x < canvas.width; x++) {
@@ -64,6 +76,9 @@
     }
 
     ctx.putImageData(image, 0, 0);
+
+    var body = document.getElementsByTagName('body')[0];
+    body.style.background = "url(" + canvas.toDataURL("image/png")+ ")";
 
   </script>
 
