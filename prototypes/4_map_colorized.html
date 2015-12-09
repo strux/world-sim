@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Phaser - Making your first game, part 1</title>
+  <script type="text/javascript" src="js/noise.js"></script>
+  <style type="text/css">
+    body {
+      margin: 0;
+      color: #730505;
+    }
+    canvas { display: none; }
+    p { margin: 2rem; }
+  </style>
+</head>
+<body>
+
+  <canvas></canvas>
+
+  <script type="text/javascript">
+
+    var noise = new Noise();
+    var seed = Math.random();
+    noise.seed(seed);
+
+    var canvas = document.getElementsByTagName('canvas')[0];
+    canvas.width = 512;
+    canvas.height = 512;
+    var blendSize = 16,
+        scale = .005,
+        ctx = canvas.getContext('2d'),
+        image = ctx.createImageData(canvas.width, canvas.height),
+        waterLevel = 140,
+        data = [],
+        transpose = function transpose(a) {
+          return a[0].map(function (_, c) { return a.map(function (r) { return r[c]; }); });
+        };
+
+    for (var x = 0; x < canvas.width; x++) {
+      data[x] = [];
+      for (var y = 0; y < canvas.height; y++) {
+        var value = noise.simplex2SumOctave(8, x, y, 0.5, scale, 0, 255);
+        data[x][y] = value;
+      }
+    }
+    // Blend
+    for (var x = 0; x < canvas.width; x++) {
+      var multiplier = blendSize;
+      for(var b=0; b<blendSize; b++) {
+        var wrapped = noise.simplex2SumOctave(8, x, canvas.height+b, 0.5, scale, 0, 255);
+        data[x][b] = ((wrapped * multiplier) + (data[x][b] * b)) / blendSize;
+        multiplier--;
+      }
+    }
+    var multiplier = blendSize;
+    for(var b=0; b<blendSize; b++) {
+      for (var y = 0; y < canvas.height; y++) {
+        var wrapped = noise.simplex2SumOctave(8, canvas.width+b, y, 0.5, scale, 0, 255);
+        data[b][y] = ((wrapped * multiplier) + (data[b][y] * b)) / blendSize;
+      }
+      multiplier--;
+    }
+
+    // Write image.data
+    var levels = [];
+    levels[135] = [0, 71, 165, 1]; // deeps
+    levels[141] = [0, 101, 165, 1]; // shwallows
+    levels[145] = [204, 177, 82, 1]; // sand
+    levels[180] = [86, 125, 38, 1]; // grass
+    levels[200] = [152, 152, 152, 1]; // mountain
+    levels[255] = [240, 240, 240, 1]; // snow
+
+    var getColor = function(value) {
+      for(var l in levels) {
+        if (Math.min(value, l) == value) {
+          return levels[l];
+        }
+      }
+    }
+
+    var writeRGBA = function(cell, color) {
+      image.data[cell] = color[0];
+      image.data[cell + 1] = color[1];
+      image.data[cell + 2] = color[2];
+      image.data[cell + 3] = 255; // alpha.
+    }
+
+    for (var x = 0; x < canvas.width; x++) {
+      for (var y = 0; y < canvas.height; y++) {
+        var cell = (x + y * canvas.width) * 4;
+        var color = getColor(data[x][y]);
+        writeRGBA(cell, color);
+      }
+    }
+
+    ctx.putImageData(image, 0, 0);
+
+    var body = document.getElementsByTagName('body')[0];
+    body.style.background = "url(" + canvas.toDataURL("image/png")+ ")";
+    var p = document.createElement('p');
+    p.textContent = 'SEED: ' + seed
+    body.appendChild(p)
+
+  </script>
+
+</body>
+</html>
