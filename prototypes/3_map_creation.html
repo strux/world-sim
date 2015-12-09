@@ -15,6 +15,10 @@
   <canvas></canvas>
 
   <script type="text/javascript">
+
+    var noise = new Noise();
+    noise.seed(Math.random());
+
     var sumOctave = function(num_iterations, x, y, persistence, scale, low, high) {
       var maxAmp = 0,
           amp = 1,
@@ -44,7 +48,6 @@
     var overlapSize = 32;
     canvas.width = 512;
     canvas.height = 512;
-    noise.seed(Math.random());
     var scale = .005;
     var ctx = canvas.getContext('2d');
     var image = ctx.createImageData(canvas.width, canvas.height);
