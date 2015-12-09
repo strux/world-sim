@@ -20,44 +20,46 @@
     // noise.seed(Math.random());
 
     var canvas = document.getElementsByTagName('canvas')[0];
-    var overlapSize = 32;
     canvas.width = 512;
     canvas.height = 512;
-    var scale = .005;
-    var ctx = canvas.getContext('2d');
-    var image = ctx.createImageData(canvas.width, canvas.height);
-    var data = image.data;
+    var blendSize = 32,
+        scale = .005,
+        ctx = canvas.getContext('2d'),
+        image = ctx.createImageData(canvas.width, canvas.height),
+        waterLevel = 140,
+        data = [],
+        transpose = function transpose(a) {
+          return a[0].map(function (_, c) { return a.map(function (r) { return r[c]; }); });
+        };
 
-    var waterLevel = 140;
-    var dataArr = [];
     for (var x = 0; x < canvas.width; x++) {
-      dataArr[x] = [];
-      for (var y = 0; y < canvas.height + overlapSize; y++) {
-        // var value = sumOctave(8, x, y, 0.5, scale, 0, 255)
+      data[x] = [];
+      for (var y = 0; y < canvas.height; y++) {
         var value = noise.simplex2SumOctave(8, x, y, 0.5, scale, 0, 255);
-        dataArr[x][y] = value;
+        data[x][y] = value;
       }
-      var overlap = dataArr[x].splice((canvas.width - 1 - overlapSize), canvas.width-1);
-      var multip = overlapSize;
-      for(var o=0; o < overlapSize; o++) {
-        dataArr[x][o] = ((overlap[o] * multip) + (dataArr[x][o] * o)) / overlapSize;
-        multip--;
+      // Blend
+      var multiplier = blendSize;
+      for(var b=0; b<blendSize; b++) {
+        var wrapped = noise.simplex2SumOctave(8, x, y+b, 0.5, scale, 0, 255);
+        data[x][b] = ((wrapped * multiplier) + (data[x][b] * b)) / blendSize;
+        multiplier--;
       }
       // hacky ocean post-process
-      for (var y = 0; y < canvas.height + overlapSize; y++) {
-        if (dataArr[x][y] < waterLevel) {
-          dataArr[x][y] = waterLevel * 0.8;
+      for (var y = 0; y < canvas.height; y++) {
+        if (data[x][y] < waterLevel) {
+          data[x][y] = waterLevel * 0.8;
         }
       }
     }
+    // data = data.concat(data.splice(0, 255));
 
-    // dataArr = dataArr.concat(dataArr.splice(0, 255));
-
+    // Write image.data
     for (var x = 0; x < canvas.width; x++) {
       for (var y = 0; y < canvas.height; y++) {
         var cell = (x + y * canvas.width) * 4;
-        data[cell] = data[cell + 1] = data[cell + 2] = dataArr[x][y];
-        data[cell + 3] = 255; // alpha.
+        image.data[cell] = image.data[cell + 1] = image.data[cell + 2] = data[x][y];
+        image.data[cell + 3] = 255; // alpha.
       }
     }
 
