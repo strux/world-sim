@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8" />
+	<title>Phaser - Making your first game, part 1</title>
+	<script type="text/javascript" src="js/phaser.js"></script>
+  <script type="text/javascript" src="js/noise.js"></script>
+  <script type="text/javascript" src="js/map.js"></script>
+    <style type="text/css">
+        body {
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+  <canvas></canvas>
+
+<script type="text/javascript">
+
+
+/**************************************************************
+* config
+**************************************************************/
+
+var cofig,
+    bitmapData,
+    BitmapFactory,
+    bmf,
+    BmSprite,
+    Map,
+    map,
+    MapFactroy,
+    TileManager,
+    tm,
+    game,
+    debugText = [];
+
+config = {
+  tile: {
+    width: 8,
+    height: 8,
+  },
+  view: {
+    tileWidth: 40,
+    tileHeight: 40,
+  },
+  map: {
+    width: 512,
+    height: 512,
+  }
+}
+
+bitmapData = [
+  {
+    key: 'alpine',
+    width: config.tile.width,
+    height: config.tile.height,
+    color: '#78756E'
+  },
+  {
+    key: 'grass',
+    width: config.tile.width,
+    height: config.tile.height,
+    color: '#517D3E'
+  },
+  {
+    key: 'beach',
+    width: config.tile.width,
+    height: config.tile.height,
+    color: '#7D6C3E'
+  },
+  {
+    key: 'ocean',
+    width: config.tile.width,
+    height: config.tile.height,
+    color: '#3E667D'
+  },
+]
+
+map = [
+  ['ocean', 'ocean', 'ocean','ocean', 'ocean', 'ocean', 'ocean', 'ocean'],
+  ['ocean', 'ocean', 'ocean','ocean', 'ocean', 'ocean', 'ocean', 'ocean'],
+  ['ocean', 'beach', 'beach', 'beach', 'beach', 'beach', 'beach', 'ocean'],
+  ['ocean', 'beach', 'beach', 'alpine', 'alpine', 'alpine', 'beach', 'ocean'],
+  ['ocean', 'beach', 'beach', 'beach', 'beach', 'beach', 'beach', 'ocean'],
+  ['ocean', 'ocean', 'ocean','ocean', 'ocean', 'ocean', 'ocean', 'ocean'],
+  ['ocean', 'ocean', 'ocean','ocean', 'ocean', 'ocean', 'ocean', 'ocean'],
+];
+
+/**************************************************************
+* BitmapFactory
+**************************************************************/
+BitmapFactory = function(bitmapData) {
+  var bmf = this;
+  bmf.bitmaps = {};
+  bmf.bitmapData = bitmapData;
+
+  this.bitmapData.forEach(function(data) {
+    bmf.bitmaps[data.name] = bmf.addBitmapData(data);
+  })
+}
+BitmapFactory.prototype.addBitmapData = function(data) {
+  var bmd = game.add.bitmapData(data.width, data.height);
+  bmd.ctx.beginPath();
+  bmd.ctx.rect(0, 0, data.width, data.height);
+  bmd.ctx.fillStyle = data.rgba();
+  bmd.ctx.fill();
+  return bmd;
+}
+
+/**************************************************************
+* TileManager
+**************************************************************/
+
+TileManager = function(game, map, tileWidth, tileHeight, width, height, bitmaps) {
+  this.game = game;
+  this.map = map;
+  this.tileWidth = tileWidth;
+  this.tileHeight = tileHeight;
+  this.viewWidth = width;
+  this.viewHeight = height;
+  this.bitmaps = bitmaps;
+  this.startColumn = 0;
+  this.startX = 0;
+  this.renderCount = 0;
+  this.currentTiles = [];
+  this.proposedTiles = [];
+  this.edgeBuffer = 1;
+
+  Phaser.Group.call(this, this.game);
+}
+TileManager.prototype = Object.create(Phaser.Group.prototype);
+TileManager.prototype.constructor = TileManager;
+TileManager.prototype.update = function() {
+  this.calculateStartData();
+  this.calculateProposedTiles();
+  if (this.shouldDrawTiles()) {
+    this.renderCount += 1;
+    this.removeAll(true, true);
+
+    this.proposedTiles.forEach(function(row) {
+      row.forEach(function(tileData) {
+        var tile = this.create(tileData.x, tileData.y, this.bitmaps[this.map[tileData.row][tileData.column]['name']]);
+        tile.tileData = tileData;
+      }, this);
+    }, this);
+  }
+  this.currentTiles = this.proposedTiles;
+debugText[0] = this.tileDebug();
+debugText[1] = 'children: ' + this.children.length + ' rednder count: ' + this.renderCount;
+}
+TileManager.prototype.tileDebug = function() {
+  var text = '';
+  this.proposedTiles[0].forEach(function(tile) {
+    text += '[' + tile.row + '][' + tile.column + '] ' + tile.x + ',' + tile.y + '  |  ';
+  })
+  return text
+}
+TileManager.prototype.calculateStartData = function() {
+  this.startRow = Math.floor(-this.y / this.tileHeight);
+  this.startColumn = Math.floor(-this.x / this.tileWidth);
+  this.startX = this.tileWidth * this.startColumn;
+  this.startY = this.tileHeight * this.startRow;
+}
+TileManager.prototype.calculateProposedTiles = function() {
+  this.proposedTiles = [];
+  for(var j=0; j<this.viewHeight + this.edgeBuffer; j++) {
+    var row = [],
+        y = (this.tileHeight * j) + this.startY,
+        viewRow = this.wrappedIndex(this.startRow + j);
+    for(var i=0; i<this.viewWidth + this.edgeBuffer; i++) {
+      var tile = {
+        row: viewRow,
+        column: this.wrappedIndex(this.startColumn + i),
+        x: (this.tileWidth * i) + this.startX,
+        y: y,
+      }
+      row.push(tile);
+    }
+    this.proposedTiles.push(row);
+  }
+}
+TileManager.prototype.wrappedIndex = function(index) {
+  // XXX: BUG????? this.map.length assuming square map??
+  var col;
+  if(index < 0) {
+    col = index % this.map.length
+    if(col < 0) col += this.map.length;
+    return col;
+  } else if (index >= this.map.length) {
+    col = index % this.map.length;
+    return col;
+  } else {
+    return index;
+  }
+}
+TileManager.prototype.shouldDrawTiles = function() {
+  return this.currentTiles.length == 0 ||
+      (JSON.stringify(this.currentTiles) !== JSON.stringify(this.proposedTiles));
+}
+
+game = new Phaser.Game(
+        config.view.tileWidth * config.tile.width,
+        config.view.tileHeight * config.tile.height,
+        Phaser.AUTO,
+        '',
+        { preload: preload, create: create, update: update, render:render });
+
+function preload() {
+  bmf = new BitmapFactory(newMap.elevations);
+  tm = new TileManager(game, newMap.tileData, config.tile.width, config.tile.height, config.view.tileWidth, config.view.tileHeight, bmf.bitmaps);
+}
+
+function create() {
+}
+
+function update() {
+  if (game.input.keyboard.isDown(Phaser.Keyboard.LEFT)) {
+    tm.x += 4;
+  }
+  if (game.input.keyboard.isDown(Phaser.Keyboard.RIGHT)) {
+    tm.x -= 4;
+  }
+  if (game.input.keyboard.isDown(Phaser.Keyboard.UP)) {
+    tm.y += 4;
+  }
+  if (game.input.keyboard.isDown(Phaser.Keyboard.DOWN)) {
+    tm.y -= 4;
+  }
+}
+
+function render() {
+  return
+  game.debug.text(debugText[0], 12, 128);
+  game.debug.text(debugText[1], 12, 160);
+  game.debug.text(debugText[2], 12, 192);
+}
+
+var canvas = document.getElementsByTagName('canvas')[0];
+canvas.width = config.map.width;
+canvas.height = config.map.height;
+var ctx = canvas.getContext('2d'),
+    seed = Math.random(),
+    image = ctx.createImageData(canvas.width, canvas.height),
+    newMap = new Map(canvas.width, canvas.height, seed, config.tile.width, config.tile.height);
+newMap.writeTileData();
+image = newMap.writeImageData(image);
+ctx.putImageData(image, 0, 0);
+
+</script>
+
+</body>
+</html>
