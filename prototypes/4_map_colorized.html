@@ -31,10 +31,7 @@
         ctx = canvas.getContext('2d'),
         image = ctx.createImageData(canvas.width, canvas.height),
         waterLevel = 140,
-        data = [],
-        transpose = function transpose(a) {
-          return a[0].map(function (_, c) { return a.map(function (r) { return r[c]; }); });
-        };
+        data = [];
 
     for (var x = 0; x < canvas.width; x++) {
       data[x] = [];
