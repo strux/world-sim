@@ -24,10 +24,10 @@
     noise.seed(seed);
 
     var canvas = document.getElementsByTagName('canvas')[0];
-    canvas.width = 512;
-    canvas.height = 512;
+    canvas.width = 1024;
+    canvas.height = 1024;
     var blendSize = 16,
-        scale = .005,
+        scale = .008,
         ctx = canvas.getContext('2d'),
         image = ctx.createImageData(canvas.width, canvas.height),
         waterLevel = 140,
@@ -63,11 +63,11 @@
 
     // Write image.data
     var levels = [];
-    levels[135] = [0, 71, 165, 1]; // deeps
-    levels[141] = [0, 101, 165, 1]; // shwallows
-    levels[145] = [204, 177, 82, 1]; // sand
-    levels[180] = [86, 125, 38, 1]; // grass
-    levels[200] = [152, 152, 152, 1]; // mountain
+    levels[155] = [0, 71, 165, 1]; // deeps
+    levels[161] = [0, 101, 165, 1]; // shwallows
+    levels[165] = [204, 177, 82, 1]; // sand
+    levels[190] = [86, 125, 38, 1]; // grass
+    levels[205] = [152, 152, 152, 1]; // mountain
     levels[255] = [240, 240, 240, 1]; // snow
 
     var getColor = function(value) {
