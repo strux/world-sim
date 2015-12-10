@@ -24,8 +24,9 @@
     canvas.width = 512;
     canvas.height = 512;
     var ctx = canvas.getContext('2d'),
+        seed = 1, //Math.random(),
         image = ctx.createImageData(canvas.width, canvas.height),
-        map = new Map(canvas.width, canvas.height, Math.random());
+        map = new Map(canvas.width, canvas.height, seed);
     image = map.writeImageData(image);
     ctx.putImageData(image, 0, 0);
 

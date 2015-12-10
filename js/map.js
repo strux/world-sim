@@ -1,7 +1,9 @@
-var Map = function(width, height, seed) {
+var Map = function(width, height, seed, tileWidth, tileHeight) {
   this.width = width;
   this.height = height;
   this.seed = seed || .1
+  this.tileWidth = tileWidth;
+  this.tileHeight = tileHeight;
 
   this.data = [];
   this.blendSize = 16
@@ -9,15 +11,23 @@ var Map = function(width, height, seed) {
   this.noise = new Noise();
   this.noise.seed(this.seed);
 
-  // TODO: make these actual properties and move colors elsewhere
-  // getImageData should cross referenc with own colors maped to levels
-  this.heightProperties = {};
-  this.heightProperties[155] = [0, 71, 165, 1];    // deeps
-  this.heightProperties[161] = [0, 101, 165, 1];   // shwallows
-  this.heightProperties[165] = [204, 177, 82, 1];  // sand
-  this.heightProperties[190] = [86, 125, 38, 1];   // grass
-  this.heightProperties[205] = [152, 152, 152, 1]; // mountain
-  this.heightProperties[255] = [240, 240, 240, 1]; // snow
+  var elevation = function(name, rgbaArr, width, height) {
+      this.name = name;
+      this.rgbaArr = rgbaArr;
+      this.width = width || this.tileWidth;
+      this.height = height || this.tileHeight;
+  }
+  elevation.prototype.rgba = function() {
+    return 'rgba(' + this.rgbaArr.join(',') + ')';
+  }
+
+  this.elevations = {};
+  this.elevations[155] = new elevation('ocean', [0, 71, 165, 1]);
+  this.elevations[161] = new elevation('shallows', [0, 101, 165, 1]);
+  this.elevations[165] = new elevation('beach', [204, 177, 82, 1]);
+  this.elevations[190] = new elevation('vegetation', [86, 125, 38, 1]);
+  this.elevations[205] = new elevation('alpine', [152, 152, 152, 1]);
+  this.elevations[255] = new elevation('snow', [240, 240, 240, 1]);
 
   this.sumOctaveOptions = {
     iterations: 8,
@@ -75,12 +85,13 @@ Map.prototype = {
   },
 
   writeImageData: function(image) {
+    // image data from 2D canvas context
     var image = image;
 
     var getColor = function(value) {
-      for(var l in map.heightProperties) {
+      for(var l in map.elevations) {
         if (Math.min(value, l) == value) {
-          return map.heightProperties[l];
+          return map.elevations[l]['rgbaArr'];
         }
       }
     }
