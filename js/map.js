@@ -1,27 +1,29 @@
 var Map = function(width, height, seed, tileWidth, tileHeight) {
+  var self = this;
   this.width = width;
   this.height = height;
   this.seed = seed || .1
-  this.tileWidth = tileWidth;
-  this.tileHeight = tileHeight;
+  this.tileWidth = tileWidth || 32;
+  this.tileHeight = tileHeight || 32;
 
   this.data = [];
+  this.tileData = [];
   this.blendSize = 16
 
   this.noise = new Noise();
   this.noise.seed(this.seed);
 
-  var elevation = function(name, rgbaArr, width, height) {
+  var elevation = function(name, rgbaArr) {
       this.name = name;
       this.rgbaArr = rgbaArr;
-      this.width = width || this.tileWidth;
-      this.height = height || this.tileHeight;
+      this.width = width || self.tileWidth;
+      this.height = height || self.tileHeight;
   }
   elevation.prototype.rgba = function() {
     return 'rgba(' + this.rgbaArr.join(',') + ')';
   }
 
-  this.elevations = {};
+  this.elevations = [];
   this.elevations[155] = new elevation('ocean', [0, 71, 165, 1]);
   this.elevations[161] = new elevation('shallows', [0, 101, 165, 1]);
   this.elevations[165] = new elevation('beach', [204, 177, 82, 1]);
@@ -84,17 +86,27 @@ Map.prototype = {
     }
   },
 
+  getElevation: function(value) {
+    for(var l in this.elevations) {
+      if (Math.min(value, l) == value) {
+        return this.elevations[l];
+      }
+    }
+  },
+
+  writeTileData: function() {
+    for (var x = 0; x < this.width; x++) {
+      this.tileData[x] = [];
+      for (var y = 0; y < this.height; y++) {
+        this.tileData[x][y] = this.getElevation(this.data[x][y]);
+      }
+    }
+    return this.tileData;
+  },
+
   writeImageData: function(image) {
     // image data from 2D canvas context
     var image = image;
-
-    var getColor = function(value) {
-      for(var l in map.elevations) {
-        if (Math.min(value, l) == value) {
-          return map.elevations[l]['rgbaArr'];
-        }
-      }
-    }
 
     var writeRGBA = function(cell, color) {
       image.data[cell] = color[0];
@@ -103,10 +115,10 @@ Map.prototype = {
       image.data[cell + 3] = 255; // alpha.
     }
 
-    for (var x = 0; x < map.width; x++) {
-      for (var y = 0; y < map.height; y++) {
-        var cell = (x + y * map.width) * 4;
-        var color = getColor(this.data[x][y]);
+    for (var x = 0; x < this.width; x++) {
+      for (var y = 0; y < this.height; y++) {
+        var cell = (x + y * this.width) * 4;
+        var color = this.getElevation(this.data[x][y])['rgbaArr'];
         writeRGBA(cell, color);
       }
     }
