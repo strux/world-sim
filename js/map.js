@@ -13,9 +13,10 @@ var Map = function(width, height, seed, tileWidth, tileHeight) {
   this.noise = new Noise();
   this.noise.seed(this.seed);
 
-  var elevation = function(name, rgbaArr) {
+  var elevation = function(name, rgbaArr, paletteKey) {
       this.name = name;
       this.rgbaArr = rgbaArr;
+      this.paletteKey = paletteKey;
       this.width = width || self.tileWidth;
       this.height = height || self.tileHeight;
   }
@@ -24,12 +25,12 @@ var Map = function(width, height, seed, tileWidth, tileHeight) {
   }
 
   this.elevations = [];
-  this.elevations[155] = new elevation('ocean', [0, 71, 165, 1]);
-  this.elevations[161] = new elevation('shallows', [0, 101, 165, 1]);
-  this.elevations[165] = new elevation('beach', [204, 177, 82, 1]);
-  this.elevations[190] = new elevation('vegetation', [86, 125, 38, 1]);
-  this.elevations[205] = new elevation('alpine', [152, 152, 152, 1]);
-  this.elevations[255] = new elevation('snow', [240, 240, 240, 1]);
+  this.elevations[155] = new elevation('ocean', [0, 71, 165, 1], 'D');
+  this.elevations[161] = new elevation('shallows', [0, 101, 165, 1], 'E');
+  this.elevations[165] = new elevation('beach', [204, 177, 82, 1], '8');
+  this.elevations[190] = new elevation('vegetation', [86, 125, 38, 1], 'A');
+  this.elevations[205] = new elevation('alpine', [152, 152, 152, 1], '1');
+  this.elevations[255] = new elevation('snow', [240, 240, 240, 1], '2');
 
   this.sumOctaveOptions = {
     iterations: 8,

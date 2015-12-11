@@ -13,10 +13,9 @@
     </style>
 </head>
 <body>
-  <canvas></canvas>
+<!-- <canvas></canvas> -->
 
 <script type="text/javascript">
-
 
 /**************************************************************
 * config
@@ -37,55 +36,18 @@ var cofig,
 
 config = {
   tile: {
-    width: 8,
-    height: 8,
+    width: 32,
+    height: 32,
   },
   view: {
-    tileWidth: 40,
-    tileHeight: 40,
+    tileWidth: 20,
+    tileHeight: 10,
   },
   map: {
     width: 512,
     height: 512,
   }
 }
-
-bitmapData = [
-  {
-    key: 'alpine',
-    width: config.tile.width,
-    height: config.tile.height,
-    color: '#78756E'
-  },
-  {
-    key: 'grass',
-    width: config.tile.width,
-    height: config.tile.height,
-    color: '#517D3E'
-  },
-  {
-    key: 'beach',
-    width: config.tile.width,
-    height: config.tile.height,
-    color: '#7D6C3E'
-  },
-  {
-    key: 'ocean',
-    width: config.tile.width,
-    height: config.tile.height,
-    color: '#3E667D'
-  },
-]
-
-map = [
-  ['ocean', 'ocean', 'ocean','ocean', 'ocean', 'ocean', 'ocean', 'ocean'],
-  ['ocean', 'ocean', 'ocean','ocean', 'ocean', 'ocean', 'ocean', 'ocean'],
-  ['ocean', 'beach', 'beach', 'beach', 'beach', 'beach', 'beach', 'ocean'],
-  ['ocean', 'beach', 'beach', 'alpine', 'alpine', 'alpine', 'beach', 'ocean'],
-  ['ocean', 'beach', 'beach', 'beach', 'beach', 'beach', 'beach', 'ocean'],
-  ['ocean', 'ocean', 'ocean','ocean', 'ocean', 'ocean', 'ocean', 'ocean'],
-  ['ocean', 'ocean', 'ocean','ocean', 'ocean', 'ocean', 'ocean', 'ocean'],
-];
 
 /**************************************************************
 * BitmapFactory
@@ -100,11 +62,14 @@ BitmapFactory = function(bitmapData) {
   })
 }
 BitmapFactory.prototype.addBitmapData = function(data) {
-  var bmd = game.add.bitmapData(data.width, data.height);
-  bmd.ctx.beginPath();
-  bmd.ctx.rect(0, 0, data.width, data.height);
-  bmd.ctx.fillStyle = data.rgba();
-  bmd.ctx.fill();
+  textureData = [];
+  for(var i=0; i<config.tile.width; i++) {
+    textureData[i] = [];
+    for(var j=0; j<config.tile.height; j++) {
+      textureData[i][j] = data.paletteKey;
+    }
+  }
+  var bmd = game.create.texture(data.name, textureData, config.tile.width, config.tile.height)
   return bmd;
 }
 
@@ -146,8 +111,6 @@ TileManager.prototype.update = function() {
     }, this);
   }
   this.currentTiles = this.proposedTiles;
-debugText[0] = this.tileDebug();
-debugText[1] = 'children: ' + this.children.length + ' rednder count: ' + this.renderCount;
 }
 TileManager.prototype.tileDebug = function() {
   var text = '';
@@ -207,6 +170,7 @@ game = new Phaser.Game(
         { preload: preload, create: create, update: update, render:render });
 
 function preload() {
+  game.load.spritesheet('sprites', 'assets/sprites_sheet.png', 8, 8, 5);
   bmf = new BitmapFactory(newMap.elevations);
   tm = new TileManager(game, newMap.tileData, config.tile.width, config.tile.height, config.view.tileWidth, config.view.tileHeight, bmf.bitmaps);
 }
@@ -236,17 +200,19 @@ function render() {
   game.debug.text(debugText[2], 12, 192);
 }
 
+var seed = Math.random(),
+    newMap = new Map(config.map.width, config.map.height, seed, config.tile.width, config.tile.height);
+newMap.writeTileData();
+/*
 var canvas = document.getElementsByTagName('canvas')[0];
 canvas.width = config.map.width;
 canvas.height = config.map.height;
 var ctx = canvas.getContext('2d'),
     seed = Math.random(),
     image = ctx.createImageData(canvas.width, canvas.height),
-    newMap = new Map(canvas.width, canvas.height, seed, config.tile.width, config.tile.height);
-newMap.writeTileData();
 image = newMap.writeImageData(image);
 ctx.putImageData(image, 0, 0);
-
+*/
 </script>
 
 </body>
