@@ -22,8 +22,8 @@
 **************************************************************/
 
 var cofig,
-    bitmapData,
-    BitmapFactory,
+    textureData,
+    TextureFactory,
     bmf,
     BmSprite,
     Map,
@@ -36,12 +36,12 @@ var cofig,
 
 config = {
   tile: {
-    width: 32,
-    height: 32,
+    width: 8,
+    height: 8,
   },
   view: {
-    tileWidth: 20,
-    tileHeight: 10,
+    tileWidth: 100,
+    tileHeight: 50,
   },
   map: {
     width: 512,
@@ -50,41 +50,36 @@ config = {
 }
 
 /**************************************************************
-* BitmapFactory
+* TextureFactory
 **************************************************************/
-BitmapFactory = function(bitmapData) {
+TextureFactory = function(textureData) {
   var bmf = this;
-  bmf.bitmaps = {};
-  bmf.bitmapData = bitmapData;
+  bmf.textureData = textureData;
 
-  this.bitmapData.forEach(function(data) {
-    bmf.bitmaps[data.name] = bmf.addBitmapData(data);
+  this.textureData.forEach(function(data) {
+     bmf.addtextureData(data);
   })
 }
-BitmapFactory.prototype.addBitmapData = function(data) {
+TextureFactory.prototype.addtextureData = function(data) {
   textureData = [];
   for(var i=0; i<config.tile.width; i++) {
-    textureData[i] = [];
-    for(var j=0; j<config.tile.height; j++) {
-      textureData[i][j] = data.paletteKey;
-    }
+    textureData[i] = Array(config.tile.height + 1).join(data.paletteKey);
   }
-  var bmd = game.create.texture(data.name, textureData, config.tile.width, config.tile.height)
-  return bmd;
+  textureData = data.texture || textureData;
+  game.create.texture(data.name, textureData);//, config.tile.width, config.tile.height)
 }
 
 /**************************************************************
 * TileManager
 **************************************************************/
 
-TileManager = function(game, map, tileWidth, tileHeight, width, height, bitmaps) {
+TileManager = function(game, map, tileWidth, tileHeight, width, height) {
   this.game = game;
   this.map = map;
   this.tileWidth = tileWidth;
   this.tileHeight = tileHeight;
   this.viewWidth = width;
   this.viewHeight = height;
-  this.bitmaps = bitmaps;
   this.startColumn = 0;
   this.startX = 0;
   this.renderCount = 0;
@@ -105,7 +100,7 @@ TileManager.prototype.update = function() {
 
     this.proposedTiles.forEach(function(row) {
       row.forEach(function(tileData) {
-        var tile = this.create(tileData.x, tileData.y, this.bitmaps[this.map[tileData.row][tileData.column]['name']]);
+        var tile = this.create(tileData.x, tileData.y, this.map[tileData.row][tileData.column]['name']);
         tile.tileData = tileData;
       }, this);
     }, this);
@@ -171,8 +166,8 @@ game = new Phaser.Game(
 
 function preload() {
   game.load.spritesheet('sprites', 'assets/sprites_sheet.png', 8, 8, 5);
-  bmf = new BitmapFactory(newMap.elevations);
-  tm = new TileManager(game, newMap.tileData, config.tile.width, config.tile.height, config.view.tileWidth, config.view.tileHeight, bmf.bitmaps);
+  bmf = new TextureFactory(newMap.elevations);
+  tm = new TileManager(game, newMap.tileData, config.tile.width, config.tile.height, config.view.tileWidth, config.view.tileHeight);
 }
 
 function create() {
