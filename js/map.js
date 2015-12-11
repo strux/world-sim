@@ -25,22 +25,91 @@ var Map = function(width, height, seed, tileWidth, tileHeight) {
     return 'rgba(' + this.rgbaArr.join(',') + ')';
   }
 
-  var beachTexture = ['88888888',
-                      '88888888',
-                      '88268888',
-                      '88888888',
-                      '88858888',
-                      '88888885',
-                      '00000000',
-                      '88888888']
+  var ocean = [
+    'DDDDDDDD',
+    'DEDDDDDD',
+    'DDDDDDED',
+    'DDDDDDDD',
+    'DDDDDDDD',
+    'DDDDDEDD',
+    'DDDDDDDD',
+    'DDDDDDDD'
+  ];
+
+  var shallows = [
+    'EEEEEEEE',
+    'EFEEEEEE',
+    'EEEEEEFE',
+    'EEEEEEEE',
+    'EEEEEEEE',
+    'EEEEEFEE',
+    'EEEEEEEE',
+    'EEEEEEEE'
+  ];
+
+  var beach = [
+    '88888888',
+    '82888888',
+    '88888828',
+    '88888888',
+    '88888888',
+    '88888288',
+    '88888888',
+    '88888888'
+  ];
+
+  var grass = [
+    'BBBBBBBB',
+    'BABBBBBB',
+    'BBBABBBB',
+    'BBBBBBBB',
+    'BBBBBABB',
+    'BBBBBBBB',
+    'BBABBBBB',
+    'BBBBBBBB'
+  ];
+
+  var vegetation = [
+    'BBBBBBBB',
+    'BBBAABBB',
+    'BBAAAABB',
+    'BAAAABAB',
+    'AAAAAABA',
+    'AAAAAABA',
+    'BAAA5AAB',
+    'BBB55BBB'
+  ];
+
+  var alpine = [
+    'BBB999BB',
+  	'BB91119B',
+  	'B9111119',
+  	'91111119',
+  	'91111119',
+  	'C9111199',
+  	'C99C999C',
+  	'BCCCC9CB'
+  ];
+
+  var snow = [
+    '22222222',
+    '2222F222',
+    '22222222',
+    '22222222',
+    '22222222',
+    '22222222',
+    '2F222222',
+    '22222222'
+  ];
 
   this.elevations = [];
-  this.elevations[155] = new elevation('ocean', [0, 71, 165, 1], 'D');
-  this.elevations[161] = new elevation('shallows', [0, 101, 165, 1], 'E');
-  this.elevations[165] = new elevation('beach', [204, 177, 82, 1], '8', beachTexture);
-  this.elevations[190] = new elevation('vegetation', [86, 125, 38, 1], 'A');
-  this.elevations[205] = new elevation('alpine', [152, 152, 152, 1], '1');
-  this.elevations[255] = new elevation('snow', [240, 240, 240, 1], '2');
+  this.elevations[155] = new elevation('ocean', [0, 71, 165, 1], 'D', ocean);
+  this.elevations[161] = new elevation('shallows', [0, 101, 165, 1], 'E', shallows);
+  this.elevations[165] = new elevation('beach', [204, 177, 82, 1], '8', beach);
+  this.elevations[170] = new elevation('grass', [86, 125, 38, 1], 'B', grass);
+  this.elevations[190] = new elevation('trees', [86, 125, 38, 1], 'A', vegetation);
+  this.elevations[205] = new elevation('alpine', [152, 152, 152, 1], '1', alpine);
+  this.elevations[255] = new elevation('snow', [240, 240, 240, 1], '2', snow);
 
   this.sumOctaveOptions = {
     iterations: 8,

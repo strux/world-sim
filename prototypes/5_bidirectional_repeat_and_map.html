@@ -7,13 +7,17 @@
   <script type="text/javascript" src="js/noise.js"></script>
   <script type="text/javascript" src="js/map.js"></script>
     <style type="text/css">
-        body {
-            margin: 0;
-        }
+      body {
+        margin: 0;
+      }
+      #map {
+        width: 300px;
+        height: 300px;
+      }
     </style>
 </head>
 <body>
-<!-- <canvas></canvas> -->
+<canvas id="map"></canvas>
 
 <script type="text/javascript">
 
@@ -36,12 +40,12 @@ var cofig,
 
 config = {
   tile: {
-    width: 8,
-    height: 8,
+    width: 16,
+    height: 16,
   },
   view: {
-    tileWidth: 100,
-    tileHeight: 50,
+    tileWidth: 40,
+    tileHeight: 20,
   },
   map: {
     width: 512,
@@ -66,7 +70,7 @@ TextureFactory.prototype.addtextureData = function(data) {
     textureData[i] = Array(config.tile.height + 1).join(data.paletteKey);
   }
   textureData = data.texture || textureData;
-  game.create.texture(data.name, textureData);//, config.tile.width, config.tile.height)
+  game.create.texture(data.name, textureData, 2, 2, 0);//, config.tile.width, config.tile.height)
 }
 
 /**************************************************************
@@ -161,16 +165,28 @@ game = new Phaser.Game(
         config.view.tileWidth * config.tile.width,
         config.view.tileHeight * config.tile.height,
         Phaser.AUTO,
-        '',
+        'game',
         { preload: preload, create: create, update: update, render:render });
 
 function preload() {
-  game.load.spritesheet('sprites', 'assets/sprites_sheet.png', 8, 8, 5);
   bmf = new TextureFactory(newMap.elevations);
   tm = new TileManager(game, newMap.tileData, config.tile.width, config.tile.height, config.view.tileWidth, config.view.tileHeight);
 }
 
 function create() {
+  var playerTexture = [
+    '........',
+    '..7667..',
+    '..6666..',
+    '..6666..',
+    '.FFFFFF.',
+    '..FFFF..',
+    '..EEEE..',
+    '..E..E..'
+  ];
+game.create.texture('player', playerTexture, 2, 2, 0);
+player = game.add.sprite(game.world.centerX, game.world.centerY, 'player');
+player.anchor.set(0.5);
 }
 
 function update() {
@@ -198,7 +214,6 @@ function render() {
 var seed = Math.random(),
     newMap = new Map(config.map.width, config.map.height, seed, config.tile.width, config.tile.height);
 newMap.writeTileData();
-/*
 var canvas = document.getElementsByTagName('canvas')[0];
 canvas.width = config.map.width;
 canvas.height = config.map.height;
@@ -207,7 +222,6 @@ var ctx = canvas.getContext('2d'),
     image = ctx.createImageData(canvas.width, canvas.height),
 image = newMap.writeImageData(image);
 ctx.putImageData(image, 0, 0);
-*/
 </script>
 
 </body>
