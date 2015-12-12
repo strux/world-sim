@@ -11,13 +11,12 @@
         margin: 0;
       }
       #map {
-        width: 300px;
-        height: 300px;
+        width: 200px;
+        height: 200px;
       }
     </style>
 </head>
 <body>
-<canvas id="map"></canvas>
 
 <script type="text/javascript">
 
@@ -40,12 +39,12 @@ var cofig,
 
 config = {
   tile: {
-    width: 16,
-    height: 16,
+    width: 64,
+    height: 64,
   },
   view: {
-    tileWidth: 40,
-    tileHeight: 20,
+    tileWidth: 20,
+    tileHeight: 10,
   },
   map: {
     width: 512,
@@ -70,7 +69,7 @@ TextureFactory.prototype.addtextureData = function(data) {
     textureData[i] = Array(config.tile.height + 1).join(data.paletteKey);
   }
   textureData = data.texture || textureData;
-  game.create.texture(data.name, textureData, 2, 2, 0);//, config.tile.width, config.tile.height)
+  game.create.texture(data.name, textureData, 8, 8, 0, data.width, data.height)
 }
 
 /**************************************************************
@@ -106,6 +105,11 @@ TileManager.prototype.update = function() {
       row.forEach(function(tileData) {
         var tile = this.create(tileData.x, tileData.y, this.map[tileData.row][tileData.column]['name']);
         tile.tileData = tileData;
+        // we need to do this offset after tileData is set so as
+        // not to throw of the next comparison.  Should probably
+        // account for the anchor when calculating instead...
+        tile.anchor.x = 1;
+        tile.anchor.y = 1;
       }, this);
     }, this);
   }
@@ -175,18 +179,18 @@ function preload() {
 
 function create() {
   var playerTexture = [
-    '........',
-    '..7667..',
-    '..6666..',
-    '..6666..',
-    '.FFFFFF.',
-    '..FFFF..',
-    '..EEEE..',
-    '..E..E..'
+    '...33...',
+    '...33...',
+    '...33...',
+    '33333333',
+    '33333333',
+    '...33...',
+    '...33...',
+    '...33...',
   ];
-game.create.texture('player', playerTexture, 2, 2, 0);
-player = game.add.sprite(game.world.centerX, game.world.centerY, 'player');
-player.anchor.set(0.5);
+  game.create.texture('player', playerTexture, 2, 2, 0);
+  player = game.add.sprite(game.world.centerX, game.world.centerY, 'player');
+  player.anchor.set(0.5);
 }
 
 function update() {
@@ -212,15 +216,19 @@ function render() {
 }
 
 var seed = Math.random(),
+    seed = 0.5155916668009013,
     newMap = new Map(config.map.width, config.map.height, seed, config.tile.width, config.tile.height);
+
+console.log('Seed: ' + seed);
+// Fixed Seed
+
 newMap.writeTileData();
 var canvas = document.getElementsByTagName('canvas')[0];
 canvas.width = config.map.width;
 canvas.height = config.map.height;
 var ctx = canvas.getContext('2d'),
-    seed = Math.random(),
     image = ctx.createImageData(canvas.width, canvas.height),
-image = newMap.writeImageData(image);
+    image = newMap.writeImageData(image);
 ctx.putImageData(image, 0, 0);
 </script>
 

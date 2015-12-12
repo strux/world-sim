@@ -13,18 +13,6 @@ var Map = function(width, height, seed, tileWidth, tileHeight) {
   this.noise = new Noise();
   this.noise.seed(this.seed);
 
-  var elevation = function(name, rgbaArr, paletteKey, texture) {
-      this.name = name;
-      this.rgbaArr = rgbaArr;
-      this.paletteKey = paletteKey;
-      this.texture = texture;
-      this.width = width || self.tileWidth;
-      this.height = height || self.tileHeight;
-  }
-  elevation.prototype.rgba = function() {
-    return 'rgba(' + this.rgbaArr.join(',') + ')';
-  }
-
   var ocean = [
     'DDDDDDDD',
     'DEDDDDDD',
@@ -33,7 +21,7 @@ var Map = function(width, height, seed, tileWidth, tileHeight) {
     'DDDDDDDD',
     'DDDDDEDD',
     'DDDDDDDD',
-    'DDDDDDDD'
+    'DDDDDDDD',
   ];
 
   var shallows = [
@@ -44,51 +32,61 @@ var Map = function(width, height, seed, tileWidth, tileHeight) {
     'EEEEEEEE',
     'EEEEEFEE',
     'EEEEEEEE',
-    'EEEEEEEE'
+    'EEEEEEEE',
   ];
 
   var beach = [
-    '88888888',
-    '82888888',
-    '88888828',
-    '88888888',
-    '88888888',
-    '88888288',
-    '88888888',
-    '88888888'
+    '88888888F',
+    '82888888F',
+    '88888828F',
+    '88888888F',
+    '88888888F',
+    '88888288F',
+    '88888888F',
+    '88888888F',
+    'FFFFFFFFF',
   ];
 
   var grass = [
-    'BBBBBBBB',
-    'BABBBBBB',
-    'BBBABBBB',
-    'BBBBBBBB',
-    'BBBBBABB',
-    'BBBBBBBB',
-    'BBABBBBB',
-    'BBBBBBBB'
+    'BBBBBBBB6.',
+    'BABBBBBB6F',
+    'BBBABBBB6F',
+    'BBBBBBBB6F',
+    'BBBBBABB6F',
+    'BBBBBBBB6F',
+    'BBABBBBB6F',
+    'BBBBBBBB6F',
+    '666666666F',
+    'FFFFFFFFFF',
   ];
 
   var vegetation = [
-    'BBBBBBBB',
-    'BBBAABBB',
-    'BBAAAABB',
-    'BAAAABAB',
-    'AAAAAABA',
-    'AAAAAABA',
-    'BAAA5AAB',
-    'BBB55BBB'
-  ];
+  	'BBBAABBB6..',
+  	'BBAAAABB663',
+  	'BAAAAAAB663',
+  	'BAAAAAAB663',
+  	'BAAAAAAB663',
+  	'BBA5AABB663',
+  	'BBB55BBB663',
+    'BBBBBBBB663',
+    '66666666663',
+    '66666666663',
+    '33333333333',
+   ];
 
   var alpine = [
-    'BBB999BB',
-  	'BB91119B',
-  	'B9111119',
-  	'91111119',
-  	'91111119',
-  	'C9111199',
-  	'C99C999C',
-  	'BCCCC9CB'
+    '111111116...',
+  	'1111C1116333',
+  	'111C1C116333',
+  	'11C119C16333',
+  	'1C1CC99C6333',
+  	'C1C19C996333',
+  	'1C1199C96333',
+  	'C111999C6333',
+    '666666666333',
+    '333333333333',
+    '333333333333',
+    '333333333333',
   ];
 
   var snow = [
@@ -102,14 +100,30 @@ var Map = function(width, height, seed, tileWidth, tileHeight) {
     '22222222'
   ];
 
+  var elevation = function(name, rgbaArr, paletteKey, texture, width, height, yOffset) {
+      this.name = name;
+      this.rgbaArr = rgbaArr;
+      this.paletteKey = paletteKey;
+      this.texture = texture;
+      this.width = width || self.tileWidth;
+      this.height = height || self.tileHeight;
+      this.yOffset = yOffset || 0;
+  }
+  elevation.prototype.rgba = function() {
+    return 'rgba(' + this.rgbaArr.join(',') + ')';
+  }
+
   this.elevations = [];
   this.elevations[155] = new elevation('ocean', [0, 71, 165, 1], 'D', ocean);
   this.elevations[161] = new elevation('shallows', [0, 101, 165, 1], 'E', shallows);
   this.elevations[165] = new elevation('beach', [204, 177, 82, 1], '8', beach);
   this.elevations[170] = new elevation('grass', [86, 125, 38, 1], 'B', grass);
   this.elevations[190] = new elevation('trees', [86, 125, 38, 1], 'A', vegetation);
+  this.elevations[255] = new elevation('alpine', [152, 152, 152, 1], '1', alpine);
+  /*
   this.elevations[205] = new elevation('alpine', [152, 152, 152, 1], '1', alpine);
   this.elevations[255] = new elevation('snow', [240, 240, 240, 1], '2', snow);
+  */
 
   this.sumOctaveOptions = {
     iterations: 8,
