@@ -100,6 +100,44 @@ var Map = function(width, height, seed, tileWidth, tileHeight) {
     '22222222'
   ];
 
+  var ocean = [
+    '...DD...',
+  	'..DDDD..',
+  	'.DDDDDD.',
+  	'DDDDDDDD',
+  	'DDDDDDDD',
+  	'.DDDDDD.',
+  	'..DDDD..',
+  	'...DD...'  ];
+
+  var beach = [
+    '...88...',
+  	'..8888..',
+  	'.888888.',
+  	'88888888',
+  	'88888888',
+  	'F888888F',
+  	'.F8888F.',
+  	'..F88F..',
+  	'...FF...',
+    '........',
+  ];
+
+  var grass = [
+    '...BB...',
+  	'..BABB..',
+  	'.BBBBBB.',
+  	'BABBBBBB',
+  	'BBBABBBB',
+  	'6BBBBBB6',
+  	'86BBBB68',
+  	'F86BB68F',
+  	'.F8668F.',
+  	'..F88F..',
+  	'...FF...',
+    '........',
+  ];
+
   var elevation = function(name, rgbaArr, paletteKey, texture, width, height, yOffset) {
       this.name = name;
       this.rgbaArr = rgbaArr;
@@ -114,13 +152,13 @@ var Map = function(width, height, seed, tileWidth, tileHeight) {
   }
 
   this.elevations = [];
-  this.elevations[155] = new elevation('ocean', [0, 71, 165, 1], 'D', ocean);
-  this.elevations[161] = new elevation('shallows', [0, 101, 165, 1], 'E', shallows);
+  this.elevations[161] = new elevation('ocean', [0, 71, 165, 1], 'D', ocean);
   this.elevations[165] = new elevation('beach', [204, 177, 82, 1], '8', beach);
+  this.elevations[255] = new elevation('grass', [86, 125, 38, 1], 'B', grass);
+  /*
+  this.elevations[161] = new elevation('shallows', [0, 101, 165, 1], 'E', shallows);
   this.elevations[170] = new elevation('grass', [86, 125, 38, 1], 'B', grass);
   this.elevations[190] = new elevation('trees', [86, 125, 38, 1], 'A', vegetation);
-  this.elevations[255] = new elevation('alpine', [152, 152, 152, 1], '1', alpine);
-  /*
   this.elevations[205] = new elevation('alpine', [152, 152, 152, 1], '1', alpine);
   this.elevations[255] = new elevation('snow', [240, 240, 240, 1], '2', snow);
   */
