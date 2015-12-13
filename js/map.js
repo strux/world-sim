@@ -14,128 +14,92 @@ var Map = function(width, height, seed, tileWidth, tileHeight) {
   this.noise.seed(this.seed);
 
   var ocean = [
-    'DDDDDDDD',
-    'DEDDDDDD',
-    'DDDDDDED',
-    'DDDDDDDD',
-    'DDDDDDDD',
-    'DDDDDEDD',
-    'DDDDDDDD',
-    'DDDDDDDD',
+    '......DDDD......',
+  	'....DDDDDDDD....',
+  	'..DDDDDDDDDDDD..',
+  	'DDDDDDDDDDDDDDDD',
+  	'DDDDDDDDDDDDDDDD',
+  	'..DDDDDDDDDDDD..',
+  	'....DDDDDDDD....',
+  	'......DDDD......',
   ];
 
   var shallows = [
-    'EEEEEEEE',
-    'EFEEEEEE',
-    'EEEEEEFE',
-    'EEEEEEEE',
-    'EEEEEEEE',
-    'EEEEEFEE',
-    'EEEEEEEE',
-    'EEEEEEEE',
+    '......EEEE......',
+  	'....EEEEEEEE....',
+  	'..EEEEEEEEEEEE..',
+  	'EEEEEEEEEEEEEEEE',
+  	'EEEEEEEEEEEEEEEE',
+  	'..EEEEEEEEEEEE..',
+  	'....EEEEEEEE....',
+  	'......EEEE......',
   ];
 
   var beach = [
-    '88888888F',
-    '82888888F',
-    '88888828F',
-    '88888888F',
-    '88888888F',
-    '88888288F',
-    '88888888F',
-    '88888888F',
-    'FFFFFFFFF',
+    '......8888......',
+  	'....88888888....',
+  	'..888888888888..',
+  	'8888888888888888',
+  	'8888888888888888',
+  	'..888888888888..',
+  	'....88888888....',
+  	'......8888......',
   ];
 
   var grass = [
-    'BBBBBBBB6.',
-    'BABBBBBB6F',
-    'BBBABBBB6F',
-    'BBBBBBBB6F',
-    'BBBBBABB6F',
-    'BBBBBBBB6F',
-    'BBABBBBB6F',
-    'BBBBBBBB6F',
-    '666666666F',
-    'FFFFFFFFFF',
+    '......BBBB......',
+  	'....BBBBBBBB....',
+  	'..BBBBBBBBBBBB..',
+  	'BBBBBBBBBBBBBBBB',
+  	'BBBBBBBBBBBBBBBB',
+  	'66BBBBBBBBBBBB66',
+  	'..66BBBBBBBB66..',
+  	'....66BBBB66....',
+  	'......6666......',
+  	'................',
   ];
 
   var vegetation = [
-  	'BBBAABBB6..',
-  	'BBAAAABB663',
-  	'BAAAAAAB663',
-  	'BAAAAAAB663',
-  	'BAAAAAAB663',
-  	'BBA5AABB663',
-  	'BBB55BBB663',
-    'BBBBBBBB663',
-    '66666666663',
-    '66666666663',
-    '33333333333',
-   ];
+    '........A.......',
+  	'........9.......',
+  	'.......AAA......',
+  	'........9.......',
+  	'......AAAAA.....',
+  	'......B999......',
+  	'....BAAAAAAA....',
+  	'..BBBB99999BBB..',
+  	'BBBBAAAAAAAAABBB',
+  	'BBBBB9999999BBBB',
+  	'66BAAAAAAAAAAA66',
+  	'6666BBB666BB6666',
+  	'..66BBBBBBBB66..',
+  	'....66BBBB66....',
+  	'......6666......',
+  	'................',
+  ];
 
   var alpine = [
-    '111111116...',
-  	'1111C1116333',
-  	'111C1C116333',
-  	'11C119C16333',
-  	'1C1CC99C6333',
-  	'C1C19C996333',
-  	'1C1199C96333',
-  	'C111999C6333',
-    '666666666333',
-    '333333333333',
-    '333333333333',
-    '333333333333',
-  ];
-
-  var snow = [
-    '22222222',
-    '2222F222',
-    '22222222',
-    '22222222',
-    '22222222',
-    '22222222',
-    '2F222222',
-    '22222222'
-  ];
-
-  var ocean = [
-    '...DD...',
-  	'..DDDD..',
-  	'.DDDDDD.',
-  	'DDDDDDDD',
-  	'DDDDDDDD',
-  	'.DDDDDD.',
-  	'..DDDD..',
-  	'...DD...'  ];
-
-  var beach = [
-    '...88...',
-  	'..8888..',
-  	'.888888.',
-  	'88888888',
-  	'88888888',
-  	'F888888F',
-  	'.F8888F.',
-  	'..F88F..',
-  	'...FF...',
-    '........',
-  ];
-
-  var grass = [
-    '...BB...',
-  	'..BABB..',
-  	'.BBBBBB.',
-  	'BABBBBBB',
-  	'BBBABBBB',
-  	'6BBBBBB6',
-  	'86BBBB68',
-  	'F86BB68F',
-  	'.F8668F.',
-  	'..F88F..',
-  	'...FF...',
-    '........',
+    '................',
+    '................',
+    '................',
+    '......999.......',
+    '.....9FFF9......',
+    '....9FFFFF9.....',
+    '...9999FF119....',
+    '...9919911919...',
+    '..991999111999..',
+    '.99999911111119.',
+    '9991999911111119',
+    '9919999991191999',
+    '1199999911999911',
+    '1111999919991111',
+    '..111199991111..',
+    '....11111111....',
+  	'......1111......',
+  	'................',
+  	'................',
+  	'................',
+  	'................',
   ];
 
   var elevation = function(name, rgbaArr, paletteKey, texture, width, height, yOffset) {
@@ -152,9 +116,12 @@ var Map = function(width, height, seed, tileWidth, tileHeight) {
   }
 
   this.elevations = [];
-  this.elevations[161] = new elevation('ocean', [0, 71, 165, 1], 'D', ocean);
-  this.elevations[165] = new elevation('beach', [204, 177, 82, 1], '8', beach);
-  this.elevations[255] = new elevation('grass', [86, 125, 38, 1], 'B', grass);
+  this.elevations[155] = new elevation('ocean', [0, 71, 165, 1], 'D', ocean);
+  this.elevations[162] = new elevation('shallows', [0, 101, 165, 1], 'E', shallows);
+  this.elevations[166] = new elevation('beach', [204, 177, 82, 1], '8', beach);
+  this.elevations[171] = new elevation('grass', [86, 125, 38, 1], 'B', grass);
+  this.elevations[190] = new elevation('trees', [86, 125, 38, 1], 'A', vegetation);
+  this.elevations[255] = new elevation('alpine', [152, 152, 152, 1], '1', alpine);
   /*
   this.elevations[161] = new elevation('shallows', [0, 101, 165, 1], 'E', shallows);
   this.elevations[170] = new elevation('grass', [86, 125, 38, 1], 'B', grass);

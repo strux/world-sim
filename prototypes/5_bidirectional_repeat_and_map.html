@@ -39,12 +39,12 @@ var cofig,
 
 config = {
   tile: {
-    width: 24,
+    width: 48,
     height: 24,
   },
   view: {
     tileWidth: 20,
-    tileHeight: 10,
+    tileHeight: 20,
   },
   map: {
     width: 512,
@@ -88,7 +88,7 @@ TileManager = function(game, map, tileWidth, tileHeight, width, height) {
   this.renderCount = 0;
   this.currentTiles = [];
   this.proposedTiles = [];
-  this.edgeBuffer = 1;
+  this.edgeBuffer = 2;
 
   Phaser.Group.call(this, this.game);
 }
@@ -129,7 +129,7 @@ TileManager.prototype.calculateStartData = function() {
 }
 TileManager.prototype.calculateProposedTiles = function() {
   this.proposedTiles = [];
-  for(var j=0; j<Math.floor(this.viewHeight) + this.edgeBuffer; j++) {
+  for(var j=0; j<Math.floor(this.viewHeight) + this.edgeBuffer * 1.5; j++) {
     var row = [],
         y = Math.floor(this.tileHeight * j / 2) + this.startY,
         viewRow = this.wrappedIndex(this.startRow + j);
