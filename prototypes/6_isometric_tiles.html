@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8" />
+	<title>Phaser - Making your first game, part 1</title>
+	<script type="text/javascript" src="js/phaser.js"></script>
+  <script type="text/javascript" src="js/noise.js"></script>
+  <script type="text/javascript" src="js/map.js"></script>
+    <style type="text/css">
+      body {
+        margin: 0;
+      }
+      #map {
+        width: 200px;
+        height: 200px;
+      }
+    </style>
+</head>
+<body>
+
+<script type="text/javascript">
+
+/**************************************************************
+* config
+**************************************************************/
+
+var cofig,
+    textureData,
+    TextureFactory,
+    bmf,
+    BmSprite,
+    Map,
+    map,
+    MapFactroy,
+    TileManager,
+    tm,
+    game,
+    debugText = [];
+
+config = {
+  tile: {
+    width: 32,
+    height: 16,
+  },
+  view: {
+    tileWidth: 20,
+    tileHeight: 20,
+  },
+  map: {
+    width: 512,
+    height: 512,
+  }
+}
+
+/**************************************************************
+* TextureFactory
+**************************************************************/
+TextureFactory = function(textureData) {
+  var bmf = this;
+  bmf.textureData = textureData;
+
+  this.textureData.forEach(function(data) {
+     bmf.addtextureData(data);
+  })
+}
+TextureFactory.prototype.addtextureData = function(data) {
+  textureData = [];
+  for(var i=0; i<config.tile.width; i++) {
+    textureData[i] = Array(config.tile.height + 1).join(data.paletteKey);
+  }
+  textureData = data.texture || textureData;
+  game.create.texture(data.name, textureData, 3, 3, 0, data.width, data.height)
+}
+
+/**************************************************************
+* TileManager
+**************************************************************/
+
+TileManager = function(game, map, tileWidth, tileHeight, width, height) {
+  this.game = game;
+  this.map = map;
+  this.tileWidth = tileWidth;
+  this.tileHeight = tileHeight;
+  this.viewWidth = width;
+  this.viewHeight = height * 2;
+  this.startColumn = 0;
+  this.startX = 0;
+  this.renderCount = 0;
+  this.currentTiles = [];
+  this.proposedTiles = [];
+  this.edgeBuffer = 2;
+
+  Phaser.Group.call(this, this.game);
+}
+TileManager.prototype = Object.create(Phaser.Group.prototype);
+TileManager.prototype.constructor = TileManager;
+TileManager.prototype.update = function() {
+  this.calculateStartData();
+  this.calculateProposedTiles();
+  if (this.shouldDrawTiles()) {
+    this.renderCount += 1;
+    this.removeAll(true, true);
+
+    this.proposedTiles.forEach(function(row) {
+      row.forEach(function(tileData) {
+        var tileMeta = this.map[tileData.row][tileData.column];
+        var tile = this.create(tileData.x, tileData.y, 'tiles', tileMeta.index);
+        // tile.anchor.y = (Math.max(tileMeta.index, 1) - 1) * .1;
+        tile.anchor.y = tileMeta.yOffset;
+        if (tileData.row % 2 == 1) { tile.anchor.x = .5; }
+      }, this);
+    }, this);
+  }
+  this.currentTiles = this.proposedTiles;
+}
+TileManager.prototype.tileDebug = function() {
+  var text = '';
+  this.proposedTiles[0].forEach(function(tile) {
+    text += '[' + tile.row + '][' + tile.column + '] ' + tile.x + ',' + tile.y + '  |  ';
+  })
+  return text
+}
+TileManager.prototype.calculateStartData = function() {
+  this.startRow = Math.floor(-this.y / this.tileHeight * 2);
+  this.startColumn = Math.floor(-this.x / this.tileWidth);
+  this.startX = this.tileWidth * this.startColumn;
+  this.startY = this.tileHeight / 2 * this.startRow;
+}
+TileManager.prototype.calculateProposedTiles = function() {
+  this.proposedTiles = [];
+  for(var j=0; j<Math.floor(this.viewHeight) + this.edgeBuffer * 3; j++) {
+    var row = [],
+        y = Math.floor(this.tileHeight * j / 2) + this.startY,
+        viewRow = this.wrappedIndex(this.startRow + j);
+    for(var i=0; i<this.viewWidth + this.edgeBuffer; i++) {
+      var tile = {
+        row: viewRow,
+        column: this.wrappedIndex(this.startColumn + i),
+        x: (this.tileWidth * i) + this.startX,
+        y: y,
+      }
+      row.push(tile);
+    }
+    this.proposedTiles.push(row);
+  }
+}
+TileManager.prototype.wrappedIndex = function(index) {
+  // XXX: BUG????? this.map.length assuming square map??
+  var col;
+  if(index < 0) {
+    col = index % this.map.length
+    if(col < 0) col += this.map.length;
+    return col;
+  } else if (index >= this.map.length) {
+    col = index % this.map.length;
+    return col;
+  } else {
+    return index;
+  }
+}
+TileManager.prototype.shouldDrawTiles = function() {
+  return this.currentTiles.length == 0 ||
+      (JSON.stringify(this.currentTiles) !== JSON.stringify(this.proposedTiles));
+}
+
+game = new Phaser.Game(
+        config.view.tileWidth * config.tile.width,
+        config.view.tileHeight * config.tile.height,
+        Phaser.AUTO,
+        'game',
+        { preload: preload, create: create, update: update, render:render });
+
+function preload() {
+  game.load.spritesheet('tiles', 'assets/tiles.png', 32, 64, 6);
+
+  // bmf = new TextureFactory(newMap.elevations);
+}
+
+function create() {
+  tm = new TileManager(game, newMap.tileData, config.tile.width, config.tile.height, config.view.tileWidth, config.view.tileHeight);
+  var playerTexture = [
+    '88..',
+    '88..',
+    '66..',
+    '66..',
+    '6655',
+  ];
+  game.create.texture('player', playerTexture, 2, 2, 0);
+  player = game.add.sprite(game.world.centerX, game.world.centerY, 'player');
+  player.anchor.set(0.5);
+}
+
+function update() {
+  if (game.input.keyboard.isDown(Phaser.Keyboard.LEFT)) {
+    tm.x += 1;
+  }
+  if (game.input.keyboard.isDown(Phaser.Keyboard.RIGHT)) {
+    tm.x -= 1;
+  }
+  if (game.input.keyboard.isDown(Phaser.Keyboard.UP)) {
+    tm.y += 1;
+  }
+  if (game.input.keyboard.isDown(Phaser.Keyboard.DOWN)) {
+    tm.y -= 1;
+  }
+}
+
+function render() {
+  return
+  game.debug.text('[' + tm.startColumn + '] ' + tm.startX, 12, 160);
+  game.debug.text('[' + tm.startRow + '] ' + tm.startY, 12, 128);
+  game.debug.text(tm.startX, 12, 192);
+}
+
+var seed = Math.random(),
+    // seed = 0.5155916668009013,
+    newMap = new Map(config.map.width, config.map.height, seed, config.tile.width, config.tile.height);
+
+console.log('Seed: ' + seed);
+// Fixed Seed
+
+newMap.writeTileData();
+/*
+var canvas = document.getElementsByTagName('canvas')[0];
+canvas.width = config.map.width;
+canvas.height = config.map.height;
+var ctx = canvas.getContext('2d'),
+    image = ctx.createImageData(canvas.width, canvas.height),
+    image = newMap.writeImageData(image);
+ctx.putImageData(image, 0, 0);
+*/
+</script>
+
+</body>
+</html>
